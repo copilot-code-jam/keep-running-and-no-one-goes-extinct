@@ -9,9 +9,11 @@ export class Game extends Scene {
     dino!: Phaser.GameObjects.Sprite;
     cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     asteroids!: Phaser.Physics.Arcade.Group;
+    asteroidKeys: string[];    
 
     constructor() {
         super('Game');
+        this.asteroidKeys = ["small_asteroid", "large_asteroid", 'asteroid']; // Define asteroid keys
     }
 
     create() {
@@ -59,14 +61,14 @@ export class Game extends Scene {
         const groundTopCenterPosition = this.ground.getTopCenter();
 
         // Create sprite and play animation
-        this.dino = this.add.sprite(groundTopCenterPosition.x, groundTopCenterPosition.y, 'dino').setScale(3).setDepth(4);
+        this.dino = this.physics.add.sprite(groundTopCenterPosition.x, groundTopCenterPosition.y, 'dino').setScale(3).setDepth(4);
 
         this.dino.play('run');
         this.cursors = this.input.keyboard?.createCursorKeys();
 
         // Create a group for asteroids
         this.asteroids = this.physics.add.group({
-            defaultKey: 'asteroid_2',
+            defaultKey: 'large_asteroid',
             maxSize: 10
         });
 
@@ -100,13 +102,21 @@ export class Game extends Scene {
 
     spawnAsteroid() {
         const x = Phaser.Math.Between(0, this.cameras.main.width);
-        const asteroid = this.asteroids.get(x, 0);
+        const key = Phaser.Math.RND.pick(this.asteroidKeys);
+        const asteroid = this.asteroids.get(x, 0, key);
 
         if (asteroid) {
             asteroid.setActive(true);
             asteroid.setVisible(true);
             asteroid.setVelocityY(200);
             asteroid.setDepth(4);
+            asteroid.setVelocity(
+                Phaser.Math.Between(-100, 100), // x velocity for some variety
+                Phaser.Math.Between(150, 300) // y velocity (falling speed)
+              );
+              // Add rotation
+    asteroid.setAngularVelocity(Phaser.Math.Between(-100, 100));
+
         }
     }
 
@@ -130,7 +140,35 @@ export class Game extends Scene {
 
     handleCollision(dino: Phaser.GameObjects.Sprite, asteroid: Phaser.GameObjects.Image) {
         // Handle collision (e.g., end game, reduce health, etc.)
-        console.log('BOOM')
-        this.scene.start('GameOver');
+        // Stop game
+    this.gameOver = true;
+
+    // Stop player animation and movement
+    this.dino.anims.stop();
+    this.asteroids.setVelocity(0, 0);
+
+    // Tint the player red to indicate death
+    this.dino.setTint(0xff0000);
+
+    // Show game over message
+    const gameOverText = this.add
+      .text(
+        this.cameras.main.centerX,
+        this.cameras.main.centerY,
+        "GAME OVER\nExtinction by asteroid!",
+        {
+          fontFamily: "Arial",
+          fontSize: "48px",
+          color: "#ff0000",
+          stroke: "#000000",
+          strokeThickness: 6,
+          align: "center",
+        }
+      )
+      .setOrigin(0.5)
+      .setDepth(10);
+
+    // Shake camera for impact effect
+    this.cameras.main.shake(500, 0.05);
     }
 }

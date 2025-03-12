@@ -38,7 +38,9 @@ export class Preloader extends Scene
         this.load.image("background_1", 'stringstar-fields/background_1.png');
         this.load.image("background_2", 'stringstar-fields/background_2.png');
         this.load.image("tileset", 'stringstar-fields/tile.png');
-        this.load.image('asteroid_2', 'asteroids/asteroid_2.png'); 
+        this.load.image('asteroid', 'asteroids/asteroid.png'); 
+        this.load.image('small_asteroid', 'asteroids/small_asteroid.png'); 
+        this.load.image('large_asteroid', 'asteroids/large_asteroid.png'); 
         this.load.spritesheet("dino", 'dino-characters/sheets/dino.png', { frameWidth: 24, frameHeight: 24 });
     }
 
